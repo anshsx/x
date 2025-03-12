@@ -5,6 +5,7 @@ import phonenumbers
 from phonenumbers import geocoder, carrier, timezone
 from googlesearch import search
 from colorama import Fore, Style, init
+from pyfiglet import Figlet
 
 # Init colorama
 init(autoreset=True)
@@ -14,17 +15,13 @@ API_FILE = "api.json"
 def clear_terminal():
     os.system("clear" if os.name != "nt" else "cls")
 
-def banner():
-    print(f"""{Fore.CYAN}
-  _____ _           _____  _                      
- / ____| |         |  __ \| |                     
-| (___ | |__   __ _| |__) | |__   ___  _ __   ___ 
- \___ \| '_ \ / _` |  ___/| '_ \ / _ \| '_ \ / _ \
- ____) | | | | (_| | |    | | | | (_) | | | |  __/
-|_____/|_| |_|\__,_|_|    |_| |_|\___/|_| |_|\___|
-        {Fore.YELLOW}Peace shouldn't be an option
-           {Fore.MAGENTA}Script by Shadow
-    """)
+def banner(text="ShaPhone"):
+    fig = Figlet(font='slant')  # You can change the font as desired
+    ascii_art = fig.renderText(text)
+    print(Fore.CYAN + ascii_art)
+    print(f"""{Fore.YELLOW}Peace shouldn't be an option
+{Fore.MAGENTA}Script by Shadow
+""")
 
 def setup_api_keys():
     print(f"{Fore.YELLOW}[!] First-time setup: Add API keys (optional). Leave blank to skip.")
@@ -125,7 +122,7 @@ def recon_guide():
 
 def main():
     clear_terminal()
-    banner()
+    banner("ShaPhone")
     apis = load_api_keys()
 
     number = input(f"{Fore.CYAN}[?] Enter phone number with country code (e.g., +919876543210): ").strip()
