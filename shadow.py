@@ -7,8 +7,8 @@ from pyfiglet import figlet_format
 from termcolor import colored
 
 # --- CONFIG ---
-REPO_URL = "https://github.com/anshsx/ShadowX"  # <-- Replace with actual repo
-RAW_VERSION_URL = "https://raw.githubusercontent.com/anshsx/ShadowX/main/version.txt"
+REPO_URL = "https://github.com/anshsx/x"  # <-- Replace with actual repo
+RAW_VERSION_URL = "https://raw.githubusercontent.com/anshsx/x/main/version.txt"
 LOCAL_VERSION_FILE = "version.txt"
 TOOLS_JSON_PATH = "data.json"
 REPO_NAME = "ShadowX"
