@@ -38,17 +38,21 @@ def fetch_latest_version():
 def update_tool():
     print(colored("\n[!] A new version is available. Updating Shadow X...", "yellow"))
     print(colored("    Please wait... ", "cyan"))
-    
+
     # Simulate loader
     for i in range(3):
         print("." * (i + 1))
         time.sleep(1)
 
     os.chdir("..")
-    if os.path.exists(REPO_NAME):
-        shutil.rmtree(REPO_NAME)
 
+    # If REPO_NAME or 'x' folder exists, remove it first
+    if os.path.exists("x"):
+        shutil.rmtree("x")
+
+    # Clone fresh copy
     os.system(f"git clone {REPO_URL}")
+
     print(colored("\n[+] Update complete! Run the tool again.", "green"))
     exit()
 
