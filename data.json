@@ -6,5 +6,9 @@
   {
     "name": "ShaPhone",
     "run": "python3 Phone/ShaPhone.py"
+  },
+  {
+    "name": "RMF CamPhish",
+    "run": "python3 Camera/RMF/main.py"
   }
 ]
