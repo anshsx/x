@@ -1,0 +1,10 @@
+[
+  {
+    "name": "ShaIP",
+    "run": "python3 IP/ShaIP.py"
+  },
+  {
+    "name": "ShaPhone",
+    "run": "python3 Phone/ShaPhone.py"
+  }
+]
