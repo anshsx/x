@@ -116,15 +116,11 @@ def save_output(data):
     print(f"\n{Fore.GREEN}[✓] Saved result in final_output.json")
 
 def recon_guide():
-    print(f"""\n{Fore.MAGENTA}========= Recon Footprinting Tips =========
+    print(f"""\n{Fore.MAGENTA}========= For more information =========
 {Fore.YELLOW}- Save number on WhatsApp and check profile pic, status.
 - Check Telegram by syncing contact.
-- Use Google search with full number and variants.
-- Try reverse image + social network search.
 - Use Truecaller manually for identity.
-- Monitor SMS spam sites, forums or leaked DBs.
-- Combine with OSINT tools like Sherlock, Maigret, etc.
-- Search on LinkedIn, Facebook, Instagram.
+- Check Instagram, Facebook & more by syncing contact.
 """)
 
 def main():
@@ -155,10 +151,6 @@ def main():
     nl = numlookup_io(number, apis.get("numlookup_key"))
     print_section("Numlookup API", nl)
     final_result["NumLookupIO"] = nl
-
-    links = google_search(number)
-    print_links("Google Search Results", links)
-    final_result["Google"] = links
 
     save_output(final_result)
     recon_guide()
