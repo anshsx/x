@@ -15,7 +15,7 @@ API_FILE = "api.json"
 def clear_terminal():
     os.system("clear" if os.name != "nt" else "cls")
 
-def banner(text="SXPhone"):
+def banner(text="ShaPhone"):
     fig = Figlet(font='slant')  # You can change the font as desired
     ascii_art = fig.renderText(text)
     print(Fore.CYAN + ascii_art)
