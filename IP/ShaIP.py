@@ -1,17 +1,15 @@
-import argparse
 import requests, json
 import sys
-from sys import argv
 import os
+from pyfiglet import Figlet
+from colorama import Fore, Style, init
 
-parser = argparse.ArgumentParser()
-parser.add_argument ("-v", help= "target/host IP address", type=str, dest='target', required=True )
-args = parser.parse_args()
+init()
 
-fig = Figlet(font='slant')  # You can change the font as desired
+fig = Figlet(font='slant')  # You can change the font
 ascii_art = fig.renderText("ShaIP")
 
-#colours used
+# Colours
 red = '\033[31m'
 yellow = '\033[93m'
 lgreen = '\033[92m'
@@ -19,36 +17,38 @@ clear = '\033[0m'
 bold = '\033[01m'
 cyan = '\033[96m'
 
-#banner of script
+# Banner
 print(Fore.CYAN + ascii_art)
 print(f"""{Fore.YELLOW}Peace shouldn't be an option
 {Fore.MAGENTA}Script by Shadow
 """)
 
-ip = args.target
+# Ask for IP input
+ip = input(f"{Fore.CYAN}[?] Enter Target IP: {Fore.RESET}")
+
 api = "http://ip-api.com/json/"
 
 try:
-        data = requests.get(api+ip).json()
-        sys.stdout.flush()
-        a = cyan+bold+"[$]"
-        b = cyan+bold+"[$]"
-        print(red+"<--------------->"+red)
-        print (a, "[Victim]:", data['query'])
-        print (b, "[ISP]:", data['isp'])
-        print (a, "[Organisation]:", data['org'])
-        print (b, "[City]:", data['city'])        
-        print (a, "[Region]:", data['region'])      
-        print (b, "[Longitude]:", data['lon'])       
-        print (a, "[Latitude]:", data['lat'])        
-        print (b, "[Time zone]:", data['timezone'])
-        print (a, "[Zip code]:", data['zip'])
-        print(red+"<--------------->"+red)
-        print (" "+yellow)
+    data = requests.get(api + ip).json()
+    sys.stdout.flush()
+    a = cyan + bold + "[$]"
+    b = cyan + bold + "[$]"
+    print(red + "<--------------->" + red)
+    print(a, "[Victim]:", data['query'])
+    print(b, "[ISP]:", data['isp'])
+    print(a, "[Organisation]:", data['org'])
+    print(b, "[City]:", data['city'])
+    print(a, "[Region]:", data['region'])
+    print(b, "[Longitude]:", data['lon'])
+    print(a, "[Latitude]:", data['lat'])
+    print(b, "[Time zone]:", data['timezone'])
+    print(a, "[Zip code]:", data['zip'])
+    print(red + "<--------------->" + red)
+    print(" " + yellow)
 
 except KeyboardInterrupt:
-        print ('Terminating, Bye'+lgreen)
-        sys.exit(0)
-except requests.exceptions.ConnectionError as e:
-        print (red+"[~]"+" check your internet connection!"+clear)
-sys.exit(1)
+    print('Terminating, Bye' + lgreen)
+    sys.exit(0)
+except requests.exceptions.ConnectionError:
+    print(red + "[~] Check your internet connection!" + clear)
+    sys.exit(1)
